@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AAI — Sustainable Fishing Report Generator</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="logo">AAI</div>
+      <div>
+        <h1>AAI — Sustainable Fishing Report Generator</h1>
+        <p class="lead">Generate clear, formatted reports on sustainable fishing practices.</p>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="card">
+        <label for="title">Report title</label>
+        <input id="title" type="text" value="Sustainable Fishing Practices: Local Action Plan" />
+
+        <label for="audience">Audience</label>
+        <select id="audience">
+          <option value="fishermen">Local fishermen & cooperatives</option>
+          <option value="policy">Policy makers & regulators</option>
+          <option value="community">Community / NGOs</option>
+        </select>
+
+        <label for="scope">Scope / Region</label>
+        <input id="scope" type="text" value="Bay of Bengal — small-scale fisheries" />
+
+        <label for="focus">Focus areas (comma separated)</label>
+        <input id="focus" type="text" value="bycatch reduction, gear changes, seasonal closures" />
+
+        <label for="prompt">Prompt</label>
+        <textarea id="prompt">Provide a 2-page report covering: summary, challenges, best practices, community monitoring, and checklist.</textarea>
+
+        <div class="controls">
+          <select id="length">
+            <option value="short">Short</option>
+            <option value="medium" selected>Medium</option>
+            <option value="long">Long</option>
+          </select>
+          <select id="tone">
+            <option>Neutral & technical</option>
+            <option>Community-friendly</option>
+            <option>Policy-focused</option>
+          </select>
+          <button id="generate">Generate Report</button>
+        </div>
+      </div>
+
+      <div class="card preview">
+        <div id="report" class="report">Your generated report will appear here.</div>
+      </div>
+    </div>
+  </div>
+
+   <script>
+    const el = id => document.getElementById(id);
+
+    el('generate').addEventListener('click', async ()=> {
+      const promptText = `Title: ${el('title').value}\nAudience: ${el('audience').value}\nScope: ${el('scope').value}\nFocus: ${el('focus').value}\nTone: ${el('tone').value}\nLength: ${el('length').value}\n\n${el('prompt').value}`;
+
+      const response = await fetch('/generate', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({prompt: promptText})
+      });
+
+      const data = await response.json();
+      const text = data.text || "No report generated.";
+
+      // Render HTML formatting: bold and lists
+      const formatted = text
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // bold
+        .replace(/- (.*?)(?=\n|$)/g, '<li>$1</li>') // bullets
+        .replace(/\n{2,}/g, '<br><br>');
+
+      el('report').innerHTML = `<ul>${formatted}</ul>`;
+    });
+  </script>
+</body>
+</html>
